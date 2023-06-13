@@ -11,6 +11,8 @@ from dataset import XRayInferenceDataset
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
+from argparse import ArgumentParser
+
 CLASSES = [
     "finger-1",
     "finger-2",
@@ -43,11 +45,14 @@ CLASSES = [
     "Ulna",
 ]
 
-wandb_name = "grid_mask"
+parser = ArgumentParser()
+parser.add_argument("--wandb_name", type=str, default="name")
+parser.add_argument("--is_smp", type=int, default=0)
+args = parser.parse_args()
 
-SAVED_DIR = "/opt/ml/results_model/" + wandb_name
+SAVED_DIR = "/opt/ml/results_model/" + args.wandb_name
 
-save_csv_dir = "/opt/ml/results_csv/" + wandb_name
+save_csv_dir = "/opt/ml/results_csv/" + args.wandb_name
 
 model = torch.load(os.path.join(SAVED_DIR, "best_dice.pt"))
 
@@ -85,7 +90,11 @@ def test(model, data_loader, thr=0.5):
             enumerate(data_loader), total=len(data_loader)
         ):
             images = images.cuda()
-            outputs = model(images)["out"]
+
+            if args.is_smp:
+                outputs = model(images)
+            else:
+                outputs = model(images)["out"]
 
             # restore original size
             outputs = F.interpolate(outputs, size=(2048, 2048), mode="bilinear")
