@@ -25,7 +25,7 @@ from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
 # augmenation
-from transforms import base_pixeldropout_augmentation, baseaugmentation
+from transforms import custom_augmentation, baseaugmentation
 
 # loss
 # from loss import FocalLoss, DiceLoss
@@ -37,7 +37,6 @@ def parse_args():
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--epochs", type=int, default=2)
-    parser.add_argument("--num_class", type=int, default=29)
     parser.add_argument("--val_every", type=int, default=1)
     parser.add_argument("--saved_dir", type=str, default="/opt/ml/results_model/")
     parser.add_argument("--wandb_project", type=str, default="project")
@@ -166,7 +165,6 @@ def train(
     lr,
     epochs,
     is_smp,
-    num_class,
     saved_dir,
     val_every,
 ):
@@ -178,7 +176,7 @@ def train(
     wandb.config.update(args)
 
     # augmenation
-    train_tf = base_pixeldropout_augmentation()
+    train_tf = custom_augmentation()
     valid_tf = baseaugmentation()
 
     # dataset
@@ -212,12 +210,6 @@ def train(
     # 속성 가져오기
     model_module = getattr(importlib.import_module("model"), models)
     model = model_module()
-
-    # # model = getattr(model)
-    # if model=='fcn_resnet50':
-    #     model = FCN_RESNET50()
-    # if model=='fcn_resnet101':
-    #     model = FCN_RESNET101()
 
     # Loss function
     criterion = nn.BCEWithLogitsLoss()
