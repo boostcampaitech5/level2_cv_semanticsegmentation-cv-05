@@ -210,7 +210,7 @@ def train(
     # 모듈 가져오기
 
     # 속성 가져오기
-    model_module = getattr(importlib.import_module("my_model"), models)
+    model_module = getattr(importlib.import_module("model"), models)
     model = model_module()
 
     # # model = getattr(model)
